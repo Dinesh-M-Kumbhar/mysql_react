@@ -2,16 +2,18 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import "./App.css"
 
-import { Button, Form, Input } from 'antd';
+
 
 function App() {
   const [users, setUsers] = useState([]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [isUpdate, setisUpdate] = useState(false)
+  const [updateId, setUpdateId] = useState()
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [users]);
 
   const fetchUsers = async () => {
     const response = await axios.get('http://localhost:3001/users');
@@ -25,82 +27,45 @@ function App() {
     setEmail('');
   };
 
-  const update = async (id) => {
-    // console.log(users[id-1].name)
+  const Edit = async (id) => {
+    setisUpdate(true)
+    setUpdateId(id)
     setName(users[id - 1].name)
     setEmail(users[id - 1].email)
-    console.log(name)
-    // const response = await axios.put(`http://localhost:3001/users/${id}`, { name, email });
-    // console.log(response)
+  }
+  const update = async (id) => {
+    const response = await axios.put(`http://localhost:3001/users/${id}`, { name, email });
+    console.log(response)
+    setisUpdate(false)
   }
 
   return (
     <div className="App">
       <h1>Users</h1>
-      <Form
-        name="basic"
-        labelCol={{
-          span: 8,
-        }}
-        wrapperCol={{
-          span: 16,
-        }}
-        style={{
-          maxWidth: 600,
-        }}
-        initialValues={{
-          remember: true,
-        }}
-        autoComplete="off"
-      >
-        <Form.Item
-          form={Form}
-          label="name"
-          name="name"
-          value={name}
+      <label>Username
+        <input type='text' name="name" value={name}
           onChange={(e) => setName(e.target.value)}
-          rules={[
-            {
-              required: true,
-              message: 'Please input your username!',
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          label="email"
-          name="email"
-          value={email}
+        /><br></br>
+        <br></br>
+      </label>
+      <label>Email
+        <input type='text' name="email" value={email}
           onChange={(e) => setEmail(e.target.value)}
-          rules={[
-            {
-              required: true,
-              message: 'Please input your password!',
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          wrapperCol={{
-            offset: 8,
-            span: 16,
-          }}
-        >
-          <Button onClick={createUser} type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+        />
+      </label><br></br><br></br>
+      {!isUpdate ? <button onClick={createUser}>ADD user</button> :
+        <button
+          onClick={() => update(updateId)}
+          className="updateBtn">Update
+        </button>}
+
       <ul>
         {users.map(user => (
           <div key={user.id}>
             <li>{user.name} - {user.email}
               <button
-                onClick={() => update(user.id)}
-                className="updateBtn">Update</button>
+                onClick={() => Edit(user.id)}
+                className="updateBtn">Edit</button>
             </li>
           </div>
         ))}

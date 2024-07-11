@@ -51,13 +51,21 @@ app.get('/users', (req, res) => {
 });
 
 // Update a user
+
 app.put('/users/:id', (req, res) => {
   const { id } = req.params;
   const { name, email } = req.body;
-  const sql = 'UPDATE users SET name = name, email = ? WHERE id = ?';
+  
+  // Ensure name and email are strings before passing to query
+  if (typeof name !== 'string' || typeof email !== 'string') {
+    return res.status(400).send('Invalid name or email format.');
+  }
+
+  const sql = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
   db.query(sql, [name, email, id], (err, result) => {
     if (err) {
-      return res.status(500).send(err);
+      console.error('Error updating user:', err);
+      return res.status(500).send('Error updating user.');
     }
     res.send({ id, name, email });
   });
